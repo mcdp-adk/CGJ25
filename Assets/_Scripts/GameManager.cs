@@ -6,7 +6,11 @@ namespace _Scripts
     {
         [Header("点击粒子效果")] [SerializeField] private GameObject _clickParticlePrefab;
         [SerializeField] private LayerMask _raycastLayerMask;
-        private Camera _camera;
+
+        [Header("引用")] private Camera _camera;
+        private Ray _cameraRay;
+        private RaycastHit _cameraRayHit;
+        private GameObject _previousHitObject;
 
         private static GameManager Instance { get; set; }
 
@@ -14,7 +18,7 @@ namespace _Scripts
 
         private void Awake()
         {
-            if (Instance == null)
+            if (!Instance)
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
@@ -30,23 +34,28 @@ namespace _Scripts
 
         private void Update()
         {
-            // 检测鼠标左键点击
-            if (Input.GetMouseButtonDown(0))
-            {
-                ParticleOnClick();
-            }
+            HandleCameraRay();
         }
 
         #endregion
 
         #region Private Methods
 
+        private void HandleCameraRay()
+        {
+            // 更新摄像机射线
+            _cameraRay = _camera.ScreenPointToRay(Input.mousePosition);
+
+            // 如果射线没有击中任何物体
+            if (!Physics.Raycast(_cameraRay, out _cameraRayHit, Mathf.Infinity, _raycastLayerMask)) return;
+
+            // 检测鼠标左键点击
+            if (Input.GetMouseButtonDown(0)) ParticleOnClick();
+        }
+
         private void ParticleOnClick()
         {
-            Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
-
-            if (!Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _raycastLayerMask)) return;
-            GameObject particle = Instantiate(_clickParticlePrefab, hit.point, Quaternion.Euler(0, 90, 0));
+            var particle = Instantiate(_clickParticlePrefab, _cameraRayHit.point, Quaternion.Euler(0, 90, 0));
             StartCoroutine(Utilities.DestroyAfterDelay(particle, 1f));
         }
 
