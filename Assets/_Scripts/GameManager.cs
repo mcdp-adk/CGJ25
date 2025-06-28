@@ -4,8 +4,8 @@ namespace _Scripts
 {
     public class GameManager : MonoBehaviour
     {
-        [Header("点击粒子效果")] [SerializeField] private LayerMask _raycastLayerMask;
-        [SerializeField] private GameObject _clickParticlePrefab;
+        [Header("点击粒子效果")] [SerializeField] private GameObject _clickParticlePrefab;
+        [SerializeField] private LayerMask _raycastLayerMask;
         private Camera _camera;
 
         private static GameManager Instance { get; set; }
